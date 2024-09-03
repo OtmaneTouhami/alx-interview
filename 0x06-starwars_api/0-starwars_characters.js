@@ -2,43 +2,27 @@
 
 const request = require('request');
 
-// Get the movie ID from the command line arguments
-const movieId = process.argv[2];
-const apiUrl = `https://swapi-api.alx-tools.com/api/films/${movieId}/`;
+const filmNum = process.argv[2] + '/';
+const filmURL = 'https://swapi-api.hbtn.io/api/films/';
 
-// First, fetch the movie data
-request(apiUrl, function (error, response, body) {
-  if (error) {
-    console.error('Error fetching the movie data:', error);
-    return;
-  }
+// Makes API request, sets async to allow await promise
+request(filmURL + filmNum, async function (err, res, body) {
+  if (err) return console.error(err);
 
-  // Parse the JSON response
-  const movieData = JSON.parse(body);
-  const characterUrls = movieData.characters;
+  // find URLs of each character in the film as a list obj
+  const charURLList = JSON.parse(body).characters;
 
-  // Function to fetch and print a character's name
-  function fetchCharacterName(url, callback) {
-    request(url, function (err, res, body) {
-      if (err) {
-        console.error('Error fetching character data:', err);
-        return;
-      }
+  // Use URL list to character pages to make new requests
+  // await queues requests until they resolve in order
+  for (const charURL of charURLList) {
+    await new Promise(function (resolve, reject) {
+      request(charURL, function (err, res, body) {
+        if (err) return console.error(err);
 
-      const characterData = JSON.parse(body);
-      console.log(characterData.name);
-      callback();
+        // finds each character name and prints in URL order
+        console.log(JSON.parse(body).name);
+        resolve();
+      });
     });
   }
-
-  // Sequentially fetch each character name in order
-  function fetchAllCharacters(index) {
-    if (index === characterUrls.length) return;
-
-    fetchCharacterName(characterUrls[index], function () {
-      fetchAllCharacters(index + 1);
-    });
-  }
-
-  fetchAllCharacters(0);
 });

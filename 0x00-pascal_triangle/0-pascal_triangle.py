@@ -2,11 +2,10 @@
 """A module for working with Pascal's triangle."""
 
 
-
 def pascal_triangle(n):
-    '''Creates a list of lists of integers representing
+    """Creates a list of lists of integers representing
     the Pascal's triangle of a given integer.
-    '''
+    """
     result = [[1]]
     for _ in range(1, n):
         previous_row = result[-1]
